@@ -19,7 +19,10 @@ def parse_listing(row):
     link = row.find(class_="pl").a
     href = ROOT_URL + link.get("href")
     title = link.string
-    price = row.find(class_='price').string
+    try:
+        price = row.find(class_='price').string
+    except AttributeError:
+        price = "could not find price"
     date = row.find(class_='date').string
     lat = row.get("data-latitude")
     lng = row.get("data-longitude")
