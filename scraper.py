@@ -35,7 +35,9 @@ def post_listings(listings):
         
 if __name__ == '__main__':
     scrape_funcs = [f for f in dir(scrapers) if f.startswith('scrape_')]
-    listings = [getattr(scrapers,scrape_func)() for scrape_func in scrape_funcs]
+    all_scraped = [getattr(scrapers,scrape_func)() for scrape_func in scrape_funcs]
+    listings = []
+    for scraped in all_scraped:
+        listings.extend(scraped)
 
-    print listings
-#    post_listings(listings)
+    post_listings(listings)
