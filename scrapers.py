@@ -4,17 +4,19 @@ from urllib2 import urlopen
 import sys, re
 
 # *** Set the search criteria ***
-MAX_PRICE = 4200
+MAX_PRICE = 4500
 # Must have this many bedrooms-
-MIN_BDRM = 2
+MIN_BDRM = 1
 # -OR have at least this square footage
-MIN_SQFT = 1000
+MIN_SQFT = 800
 # Search term
 KEYWORD = "potrero hill"
 
 # Regexps
 SQFT_REGEXP = re.compile("[0-9]+ft", flags=re.MULTILINE)
+TRULIA_SQFT_REGEXP = re.compile("[0-9]+ sqft", flags=re.MULTILINE)
 BDRM_REGEXP = re.compile("[0-9]+br", flags=re.MULTILINE)
+TRULIA_BDRM_REGEXP = re.compile("[0-9]+bd", flags=re.MULTILINE)
 
 def scrape_craigslist():
     '''Craigslist scraper'''
@@ -76,6 +78,40 @@ def scrape_craigslist():
 
     return results
 
+def scrape_trulia():
+    root_url = "http://www.trulia.com"
+    search_url = "/for_rent/1453_nh/%dp_beds/0-%d_price/date;d_sort/"%(
+        MIN_BDRM,
+        MAX_PRICE
+    )
+
+    sys.stdout.write("Scraping trulio...")
+    sys.stdout.write(".")
+    page = urlopen(root_url + search_url).read()
+    soup = BeautifulSoup(page)
+
+    listings = soup.find_all('li', class_='property-data-elem')
+
+    results = []
+    for listing in listings:
+        link = listing.find(class_='h4').a
+        href = root_url + link.get("href")
+        title = link.strong.string.strip()
+        pricediv = listing.find(class_='lastCol')
+        price = pricediv.strong.string
+        price = re.search('\d,\d\d\d', price).group()
+        sqft = re.search(TRULIA_SQFT_REGEXP, str(pricediv))
+        sqft = sqft.group() if sqft else "could not find sqft count"
+        bdrm = re.search(TRULIA_BDRM_REGEXP, title).group()
+        address = listing.find('p', class_='man').a.get("alt")
+        date = "no date found"
+
+        results.append((title,href,price,date,address,bdrm,sqft))
+
+    return results
+
+
 if __name__ == '__main__':
     '''for debugging'''
-    print scrape_craigslist()
+    #print scrape_craigslist()
+    print scrape_trulia()
