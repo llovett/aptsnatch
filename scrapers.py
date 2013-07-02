@@ -1,6 +1,6 @@
 # -*- coding: utf-8
 from bs4 import BeautifulSoup
-from urllib2 import urlopen
+from urllib2 import urlopen, quote, unquote
 import sys, re
 
 # *** Set the search criteria ***
@@ -17,6 +17,9 @@ SQFT_REGEXP = re.compile("[0-9]+ft", flags=re.MULTILINE)
 TRULIA_SQFT_REGEXP = re.compile("[0-9]+ sqft", flags=re.MULTILINE)
 BDRM_REGEXP = re.compile("[0-9]+br", flags=re.MULTILINE)
 TRULIA_BDRM_REGEXP = re.compile("[0-9]+bd", flags=re.MULTILINE)
+TCODE_REGEXP = re.compile("{{(.*)}}", flags=re.MULTILINE)
+CL_ES_REGEXP = re.compile("subject=(.*)")
+CL_ER_REGEXP = re.compile("mailto:(.*)&?")
 
 def scrape_craigslist():
     '''Craigslist scraper'''
@@ -74,7 +77,45 @@ def scrape_craigslist():
         lng = listing.get("data-longitude")
         maps_link = "https://maps.google.com/maps?q=%s+%s"%(lat,lng) if lat and lng else "could not find location"
 
-        results.append((title,href,price,date,maps_link,bdrm,sqft))
+        ##############################
+        # Scrape reply-to email and construct a new mailto link with given template
+        lpage = urlopen(href).read()
+        lsoup = BeautifulSoup(lpage)
+
+        # Craigslist doesn't seem to be consistent with displaying the reply-to link,
+        # so this is the best I could come up with
+        email = lsoup.find(lambda x:x.has_attr("href") and x.get("href").startswith("mailto"))
+        if email:
+            email = email.get("href")
+            email_subj = re.search(CL_ES_REGEXP, email)
+            if email_subj:
+                email_subj = unquote(email_subj.group(1)).strip()
+            else:
+                email_subj = "Interested in your apt, as listed on Craigslist"
+            email_rcpt = re.search(CL_ER_REGEXP, email).group(1).strip()
+
+            # Evaluate python code in the template surrounded by {{ }}'s
+            # This way, we can fill in blanks in the template that reference var names
+            with open("email_template.txt","r") as template:
+                replacements = {}
+                contents = template.read()
+                for item in re.finditer(TCODE_REGEXP, contents):
+                    replacements[item.group(1)] = eval(item.group(1))
+                newstring = None
+                for orig, new in replacements.iteritems():
+                    newstring = (newstring or contents).replace('{{%s}}'%orig, str(new))
+
+            # Set new mailto link
+            mailto = quote("mailto:%s&subject=%s&body=%s"%(
+                    email_rcpt,
+                    email_subj,
+                    newstring
+                )
+            )
+        else:
+            mailto = "no email address?"
+
+        results.append((title,href,price,date,maps_link,bdrm,sqft,mailto))
 
     return results
 
@@ -113,5 +154,5 @@ def scrape_trulia():
 
 if __name__ == '__main__':
     '''for debugging'''
-    #print scrape_craigslist()
-    print scrape_trulia()
+    print scrape_craigslist()
+    #print scrape_trulia()
