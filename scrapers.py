@@ -4,7 +4,7 @@ from urllib2 import urlopen, quote, unquote
 import sys, re
 
 # *** Set the search criteria ***
-MAX_PRICE = 4500
+MAX_PRICE = 5000
 # Must have this many bedrooms-
 MIN_BDRM = 1
 # -OR have at least this square footage
