@@ -1,7 +1,10 @@
 # -*- coding: utf-8
 from bs4 import BeautifulSoup
 from urllib2 import urlopen, quote, unquote
-import sys, re
+import sys, re, datetime
+
+# *** General search options ***
+MAX_SCRAPED_PAGES = 10
 
 # *** Set the search criteria ***
 MAX_PRICE = 5000
@@ -28,6 +31,7 @@ def scrape_craigslist():
     root_url = "http://sfbay.craigslist.org"
 
     sys.stdout.write("Scraping craigslist...")
+    results = []
     for keyword in KEYWORDS:
         # URL to scrape
         search_url = "/search/apa/sfc?zoomToPosting=&query=%s&srchType=A&minAsk=&maxAsk=%d&bedrooms=%d"%(
@@ -40,7 +44,6 @@ def scrape_craigslist():
 
         listings = soup.find_all('p', class_='row')
 
-        results = []
         for listing in listings:
             sys.stdout.write(".")
             sys.stdout.flush()
@@ -149,7 +152,8 @@ def scrape_trulia():
         sqft = sqft.group() if sqft else "could not find sqft count"
         bdrm = re.search(TRULIA_BDRM_REGEXP, title).group()
         address = listing.find('p', class_='man').a.get("alt")
-        date = "no date found"
+        # Never lists the date, so use today (date scraped)
+        date = datetime.datetime.now().strftime("%m/%d/%Y")
 
         results.append((title,href,price,date,address,bdrm,sqft))
 

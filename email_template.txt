@@ -1,11 +1,11 @@
 Dear !!!!! LANDLORD NAME !!!!!,
 
-I just saw your listing for this apartment ({{ href }}) on Craigslist and it looks gorgeous! Is it still available??
+I just saw your listing for this apartment ({{ href }}) and it looks gorgeous! Is it still available?
 
-My boyfriend and I are moving to San Francisco this week, both of us starting jobs as software engineers. We're looking for a nice 1 or 2br apartment close to public transportation (especially CalTrain), and this apartment looks just perfect.
+My girlfriend and I are moving to San Francisco this week, both of us starting jobs as software engineers. We're looking for a nice 1 or 2br apartment close to public transportation (especially Caltrain), and this apartment looks just perfect.
 
-Please let me know if you are still looking for interested tenants and I would be very happy to see the place/submit an application. We are both able to bring proof of employment and any other materials (credit reports, references, etc.). We could stop by anytime on or after July 8th.
+Please let me know if you are still looking for interested tenants and I would be very happy to see the place/submit an application. We are both able to bring proof of employment and any other materials (credit reports, references, etc.). I am available any time tomorrow (7/11/2013), Saturday or Sunday afternoon, or anytime next week.
 
-Thank you!
+Thank you, and hope to hear from you soon!
 
 !!!!! YOUR NAME !!!!!!
